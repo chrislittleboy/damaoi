@@ -8,6 +8,7 @@
 #' @import fasterize
 
 getimpactedarea <- function(reservoir,
+                            water_bodies,
                           poss_expand = 20000,
                           river_distance = 100000,
                           nn = 100,
@@ -15,14 +16,16 @@ getimpactedarea <- function(reservoir,
                           e_tolerance = 5,
                           streambuffersize = 2000,
                           reservoirbuffersize = 5000) {
-
+  
+  reservoir <- reservoir %>% filter(name == dam) %>% st_make_valid()
+  reservoir <- getsmoothreservoirpolygon(reservoir, water_bodies, poss_expand) %>% select()
+  
   down <- getriverpoints(reservoir = reservoir,
                          direction = "downstream",
                          river_distance = river_distance,
                          nn = nn,
                          ac_tolerance = ac_tolerance,
                          e_tolerance = e_tolerance,
-                         dams = dams,
                          fac = fac,
                          dem = dem)
   up <- getriverpoints(reservoir = reservoir,
@@ -31,7 +34,6 @@ getimpactedarea <- function(reservoir,
                        nn = nn,
                        ac_tolerance = ac_tolerance,
                        e_tolerance = e_tolerance,
-                       dams = dams,
                        fac = fac,
                        dem = dem)
 
@@ -40,9 +42,7 @@ getimpactedarea <- function(reservoir,
   colnames(downline)[1] <- colnames(upline)[1] <- "geometry"
   st_geometry(downline) <- st_geometry(upline) <- "geometry"
 
-  reservoir <- dams %>% filter(name == dam) %>% st_make_valid()
-  reservoir <- getsmoothreservoirpolygon(reservoir, water_bodies, poss_expand) %>% select()
-  basearea <- rbind(damsmooth,upline,downline)
+  basearea <- rbind(reservoir,upline,downline)
   impactedarea <- cliptobasinandbuffers(damsmooth, upline, downline,basins,streambuffersize,reservoirbuffersize)
   impactedarea <- smooth(impactedarea, method = "ksmooth", smoothness = 3)
   return(impactedarea)

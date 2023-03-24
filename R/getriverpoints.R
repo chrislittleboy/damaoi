@@ -4,7 +4,6 @@ getriverpoints <- function(reservoir,
                            ac_tolerance,
                            e_tolerance,
                            nn,
-                           dams = dams,
                            fac = fac,
                            dem = dem) {
   # creates a buffer of 'river_distance' meters around the dam
