@@ -7,19 +7,22 @@
 #' @import FNN
 #' @import fasterize
 
+
 getimpactedarea <- function(
                           reservoir,
                           water_bodies,
+                          dem
                           poss_expand = 20000,
                           river_distance = 100000,
                           nn = 100,
                           ac_tolerance = 2,
                           e_tolerance = 5,
                           streambuffersize = 2000,
-                          reservoirbuffersize = 5000) {
+                          reservoirbuffersize = 5000,
+                          wbjc = 0) {
   
   reservoir <- reservoir %>% st_make_valid()
-  reservoir <- getsmoothreservoirpolygon(reservoir, water_bodies, poss_expand) %>% select()
+  reservoir <- getsmoothreservoirpolygon(reservoir, water_bodies, poss_expand, dem, wbjc)
   
   down <- getriverpoints(reservoir = reservoir,
                          direction = "downstream",
