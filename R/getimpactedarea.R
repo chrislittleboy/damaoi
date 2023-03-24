@@ -7,8 +7,9 @@
 #' @import FNN
 #' @import fasterize
 
-getimpactedarea <- function(reservoir,
-                            water_bodies,
+getimpactedarea <- function(
+                          reservoir,
+                          water_bodies,
                           poss_expand = 20000,
                           river_distance = 100000,
                           nn = 100,
@@ -17,7 +18,7 @@ getimpactedarea <- function(reservoir,
                           streambuffersize = 2000,
                           reservoirbuffersize = 5000) {
   
-  reservoir <- reservoir %>% filter(name == dam) %>% st_make_valid()
+  reservoir <- reservoir %>% filter(name == reservoir) %>% st_make_valid()
   reservoir <- getsmoothreservoirpolygon(reservoir, water_bodies, poss_expand) %>% select()
   
   down <- getriverpoints(reservoir = reservoir,
@@ -43,7 +44,7 @@ getimpactedarea <- function(reservoir,
   st_geometry(downline) <- st_geometry(upline) <- "geometry"
 
   basearea <- rbind(reservoir,upline,downline)
-  impactedarea <- cliptobasinandbuffers(damsmooth, upline, downline,basins,streambuffersize,reservoirbuffersize)
+  impactedarea <- cliptobasinandbuffers(reservoir, upline, downline,basins,streambuffersize,reservoirbuffersize)
   impactedarea <- smooth(impactedarea, method = "ksmooth", smoothness = 3)
   return(impactedarea)
 }
