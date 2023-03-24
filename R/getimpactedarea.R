@@ -7,7 +7,7 @@
 #' @import FNN
 #' @import fasterize
 
-getimpactedarea <- function(dam,
+getimpactedarea <- function(reservoir,
                           poss_expand = 20000,
                           river_distance = 100000,
                           nn = 100,
