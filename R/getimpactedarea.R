@@ -18,7 +18,7 @@ getimpactedarea <- function(
                           streambuffersize = 2000,
                           reservoirbuffersize = 5000) {
   
-  reservoir <- reservoir %>% filter(name == reservoir) %>% st_make_valid()
+  reservoir <- reservoir %>% st_make_valid()
   reservoir <- getsmoothreservoirpolygon(reservoir, water_bodies, poss_expand) %>% select()
   
   down <- getriverpoints(reservoir = reservoir,
