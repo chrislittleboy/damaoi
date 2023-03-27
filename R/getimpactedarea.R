@@ -11,7 +11,9 @@
 getimpactedarea <- function(
                           reservoir,
                           water_bodies,
-                          dem
+                          dem,
+                          fac,
+                          basins,
                           poss_expand = 20000,
                           river_distance = 100000,
                           nn = 100,
