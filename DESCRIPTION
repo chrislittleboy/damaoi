@@ -3,7 +3,7 @@ Title: This package creates an 'area of interest' for a dam to allow
     comparative impact evaluations
 Version: 0.0
 Authors@R: 
-    person("Chris", "Littleboy", , "chris.littleboy@stir.ac.uk", role = c("aut", "cre"),
+    person("Chris", "Littleboy", "chris.littleboy@stir.ac.uk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3293-7987"))
 Description: Dams have environmental and social impacts, both positive and
     negative. Impact evaluations today have no consistent way of
