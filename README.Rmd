@@ -22,6 +22,8 @@ The goal of *damaoi* is to facilitate the comparative analysis of the social and
 To date, impact evaluations use different methods to understand where exactly has been impacted by a dam, whether this be downstream, upstream, inundated areas, or areas bordering reservoirs.
 We synthesis existing approaches to create a new methodological framework which allows for consistent comparative analysis.
 
+Some people measure impacts at a basin scale. River basins are the 
+
 You can install the latest version of damaoi from CRAN with:
 
 ``` r
@@ -68,13 +70,13 @@ The first function takes two arguments, the grand polygon and the reference surf
 
 ```{r s1_corrected}
 tehri_dem <- rast(system.file("extdata", "dem_tehri.tif", package="damaoi"))
-corrected <- damaoi:::getsmoothreservoirpolygon(reservoir = tehri_grand, water_bodies = tehri_cci, dem = tehri_dem)
+corrected <- adjustreservoirpolygon(reservoir = tehri_grand, water_bodies = tehri_cci, dem = tehri_dem)
 par(mfrow = c(1,2))
 plot(st_geometry(tehri_grand), main = "Original", xlim = st_bbox(corrected)[c(1, 3)], ylim = st_bbox(corrected)[c(2, 4)])
 plot(st_geometry(corrected), main = "Corrected")
 ```
 
-This gives a truer sense of the innundated land following the reservoir.
+This gives a truer sense of the inundated land following the reservoir.
 
 ## Draw upstream and downstream lines
 

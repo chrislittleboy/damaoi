@@ -14,6 +14,8 @@ areas, or areas bordering reservoirs. We synthesis existing approaches
 to create a new methodological framework which allows for consistent
 comparative analysis.
 
+Some people measure impacts at a basin scale. River basins are the
+
 You can install the latest version of damaoi from CRAN with:
 
 ``` r
@@ -59,14 +61,6 @@ library(devtools)
 #> Loading required package: usethis
 load_all()
 #> ℹ Loading damaoi
-#> The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,
-#> which was just loaded, will retire in October 2023.
-#> Please refer to R-spatial evolution reports for details, especially
-#> https://r-spatial.org/r/2023/05/15/evolution4.html.
-#> It may be desirable to make the sf package available;
-#> package maintainers should consider adding sf to Suggests:.
-#> The sp package is now running under evolution status 2
-#>      (status 2 uses the sf package in place of rgdal)
 tehri_cci <- rast(system.file("extdata", "wb_tehri.tif", package="damaoi"))
 tehri_grand <- damaoi::tehri
 plot(tehri_cci)
@@ -82,7 +76,7 @@ surface water dataset, and ‘corrects’ the polygon.
 
 ``` r
 tehri_dem <- rast(system.file("extdata", "dem_tehri.tif", package="damaoi"))
-corrected <- damaoi:::getsmoothreservoirpolygon(reservoir = tehri_grand, water_bodies = tehri_cci, dem = tehri_dem)
+corrected <- adjustreservoirpolygon(reservoir = tehri_grand, water_bodies = tehri_cci, dem = tehri_dem)
 par(mfrow = c(1,2))
 plot(st_geometry(tehri_grand), main = "Original", xlim = st_bbox(corrected)[c(1, 3)], ylim = st_bbox(corrected)[c(2, 4)])
 plot(st_geometry(corrected), main = "Corrected")
@@ -90,7 +84,7 @@ plot(st_geometry(corrected), main = "Corrected")
 
 <img src="man/figures/README-s1_corrected-1.png" width="100%" />
 
-This gives a truer sense of the innundated land following the reservoir.
+This gives a truer sense of the inundated land following the reservoir.
 
 ## Draw upstream and downstream lines
 

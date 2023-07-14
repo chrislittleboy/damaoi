@@ -23,10 +23,10 @@ Depends:
     R (>= 4.3)
 Imports: 
     dplyr,
-    fasterize,
     FNN,
     magrittr,
     sf,
+    units,
     smoothr,
     terra,
     tibble,

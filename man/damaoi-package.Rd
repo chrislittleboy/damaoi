@@ -6,6 +6,8 @@
 \alias{damaoi-package}
 \title{damaoi: This package creates an 'area of interest' for a dam to allow comparative impact evaluations}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 Dams have environmental and social impacts, both positive and negative. Impact evaluations today have no consistent way of specifying where was impacted by dams. Reservoirs innundate land. Downstream flow is reduced. Upstream fish populations are lower. But when measuring impacts, how close to the reservoir should you consider?How far downstream or upstream? This package formalises ways of creating an area of interest around a dam. Reservoirs are standardised to match satellite-observed surface water area. Upstream and downstream rivers are determined using elevation data and accumulated river flow. The package lets users create areas of interest around a dam according to set principles. This is an essential step before being able understand the comparative impact of different dams.
 }
 \author{

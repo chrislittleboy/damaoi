@@ -1,4 +1,6 @@
 getline <- function(x) {
+  # computes the cumulative flow at each point in the river
+  # and performs the relevant geometry operation to turn this df into a sf line object
   x <- x %>%
     mutate(cum_flow_accum = .data$flow_accum/min(.data$flow_accum)) %>%
     st_as_sf(coords = c("x", "y"),

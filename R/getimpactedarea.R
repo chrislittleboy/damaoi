@@ -2,13 +2,6 @@
 #' 
 #' Performs 1) standardisation of reservoir extent, 2) calculation of river course upstream and downstream and 3) clipping to river basins
 #' @export
-#' @importFrom smoothr smooth
-#' @importFrom dplyr mutate arrange rename .data as_tibble row_number
-#' @importFrom tidyr drop_na
-#' @import terra
-#' @import sf
-#' @import FNN
-#' @import fasterize
 #' @param reservoir An sf polygon, with an unstandardised raw reservoir
 #' @param water_bodies A rast, where 1 indicates water, NA otherwise
 #' @param dem A rast, showing elevation
@@ -22,7 +15,6 @@
 #' @param streambuffersize A number indicating the distance around the upstream and downstream river to consider as impacted. Defaults to 2000 (2km).
 #' @param reservoirbuffersize A number indicating the distance around the reserviur to consider as impacted. Defaults to 5000 (5km)
 #' @param wbjc A number, the water body join correction. This indicates the buffer zone for the reservoir, to ensure that it is contiguous (important where there are small channels connecting different parts of the same water body). Default is 0, but is necessary for some dams depending on the context. 
-#' 
 
 
 getimpactedarea <- function(
@@ -40,9 +32,11 @@ getimpactedarea <- function(
                           reservoirbuffersize = 5000,
                           wbjc = 0) {
   
+  # attempts to correct for invalid geometries for the input polygon
   reservoir <- reservoir %>% st_make_valid()
-  reservoir <- getsmoothreservoirpolygon(reservoir, water_bodies, poss_expand, dem, wbjc)
-  
+  # adjusts the surface area of the reservoir with satellite-observed surface water to ensure consistency.
+  reservoir <- adjustreservoirpolygon(reservoir = reservoir, water_bodies = water_bodies, poss_expand = poss_expand, dem = dem, wbjc = wbjc)
+  # draws river points downstream  
   down <- getriverpoints(reservoir = reservoir,
                          direction = "downstream",
                          river_distance = river_distance,
@@ -51,6 +45,7 @@ getimpactedarea <- function(
                          e_tolerance = e_tolerance,
                          fac = fac,
                          dem = dem)
+  # draws river points upstream
   up <- getriverpoints(reservoir = reservoir,
                        direction = "upstream",
                        river_distance = river_distance,
@@ -60,13 +55,15 @@ getimpactedarea <- function(
                        fac = fac,
                        dem = dem)
 
-  downline <- getline(down)
-  upline <- getline(up)
-  colnames(downline)[1] <- colnames(upline)[1] <- "geometry"
-  st_geometry(downline) <- st_geometry(upline) <- "geometry"
-
-  basearea <- rbind(reservoir,upline,downline)
-  impactedarea <- cliptobasinandbuffers(reservoir, upline, downline,basins,streambuffersize,reservoirbuffersize)
+  #creates buffers and clips to basins
+  impactedarea <- basinandbuffers(reservoir = reservoir, 
+                                  upstream = up[[2]], 
+                                  downstream = down[[2]],
+                                  basins = basins,
+                                  streambuffersize = streambuffersize,
+                                  reservoirbuffersize = reservoirbuffersize)
+  
+  # 'smooths' final polygon to remove jagged edges due to raster processing
   impactedarea <- smooth(impactedarea, method = "ksmooth", smoothness = 3)
   return(impactedarea)
 }
