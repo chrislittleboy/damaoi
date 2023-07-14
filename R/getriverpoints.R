@@ -50,7 +50,7 @@ getriverpoints <- function(reservoir,
     fac_dam <- fac_dam * dem_dam_binary
   }
   fac_dam[fac_dam <= 1000] <- NA
-  dam_sf <- terra::as.data.frame(fac_dam, xy = T) %>% st_as_sf(coords = c("x","y")) %>% drop_na() %>% rename(ac = hyd_glo_acc_15s)
+  dam_sf <- terra::as.data.frame(fac_dam, xy = T) %>% st_as_sf(coords = c("x","y")) %>% drop_na() %>% rename(ac = names(fac_dam))
   # matches the crs with the dam crs
   st_crs(dam_sf) <- st_crs(reservoir)
   # calculates the distance of each point to the dam
@@ -58,7 +58,7 @@ getriverpoints <- function(reservoir,
   if(direction == "upstream") { startpoint <- st_as_sf(facminmax, coords = 1:2)[1,]}
   st_crs(startpoint) <- st_crs(reservoir)
   # extracts the elevation information
-  dem_sf <- terra::as.data.frame(dem_dam, xy = T) %>% st_as_sf(coords = c("x","y")) %>% drop_na() %>% rename(e = hyd_glo_dem_15s)
+  dem_sf <- terra::as.data.frame(dem_dam, xy = T) %>% st_as_sf(coords = c("x","y")) %>% drop_na() %>% rename(e = names(dem_dam))
   st_crs(dem_sf) <- st_crs(reservoir)
   #joins this with the accumulation information
   points <- st_join(dam_sf, dem_sf)

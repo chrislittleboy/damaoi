@@ -1,6 +1,6 @@
 getline <- function(x) {
   x <- x %>%
-    mutate(cum_flow_accum = flow_accum/min(flow_accum)) %>%
+    mutate(cum_flow_accum = .data$flow_accum/min(.data$flow_accum)) %>%
     st_as_sf(coords = c("x", "y"),
              crs = x$espg[1]) %>%
     st_transform(4326)

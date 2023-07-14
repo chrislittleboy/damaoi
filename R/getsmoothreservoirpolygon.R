@@ -1,11 +1,11 @@
-getsmoothreservoirpolygon <- function(reservoir, water_bodies, poss_expand, dem, wbjc) {
-# creates a buffer zone around the GRanD polygon, size defined by "poss_expand"
+getsmoothreservoirpolygon <- function(reservoir, water_bodies, dem, poss_expand = 20000, wbjc = 0) {
+# creates a buffer zone around the GRanD polygon, size defined by "poss_expand parameter"
   rb <- st_buffer(reservoir, poss_expand)
-# crops the water bodies raster by the area  
+# crops the water bodies raster by this buffer area  
   wb <- crop(water_bodies, rb)
-# strips out the quality band for the water bodies raster
+# ensures water bodies raster only has one band
   wb <- wb$WB
-# all water is 1, otherwise NA
+# all water is set to 1, otherwise NA
   wb[!is.na(wb)] <- 1
 # crops the dem to the buffered reservoir
   demcrop <- crop(dem, rb)  
@@ -21,7 +21,7 @@ getsmoothreservoirpolygon <- function(reservoir, water_bodies, poss_expand, dem,
 # filters the expand so only areas between the minimum and maximum reservoir area are potentially expandable areas
   demcrop[demcrop > ma] <- NA
   demcrop[demcrop < mi] <- NA
-# changes all values to 1 to create a presence/absence raster of eligble elevation pixels
+# changes all values to 1 to create a presence/absence raster of eligible elevation pixels
   demcrop[!is.na(demcrop)] <- 1
 # and masks the water bodies layer by this
   wb <- wb * demcrop
@@ -30,7 +30,7 @@ getsmoothreservoirpolygon <- function(reservoir, water_bodies, poss_expand, dem,
 # wbjc = water body join correction. 
 # This is a parameter to correct for erroneously non-contiguous water bodies.
 # this won't be needed always, so default is 0. 
-# When necessary, it should be assigned the lowest possible value  
+# When necessary (i.e. narrow bottlenecks in reservoirs), it should be assigned the lowest possible value  
   polywb <- buffer(polywb, wbjc)
 # Joins the buffered geometries
   polywb <- aggregate(makeValid(polywb))

@@ -1,12 +1,40 @@
 Package: damaoi
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: This package creates an 'area of interest' for a dam to allow
+    comparative impact evaluations
+Version: 0.0
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Chris", "Littleboy", , "chris.littleboy@stir.ac.uk", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-3293-7987"))
+Description: Dams have environmental and social impacts, both positive and
+    negative. Impact evaluations today have no consistent way of
+    specifying where was impacted by dams. Reservoirs innundate land.
+    Downstream flow is reduced. Upstream fish populations are lower. But
+    when measuring impacts, how close to the reservoir should you
+    consider?How far downstream or upstream? This package formalises ways
+    of creating an area of interest around a dam. Reservoirs are
+    standardised to match satellite-observed surface water area. Upstream
+    and downstream rivers are determined using elevation data and
+    accumulated river flow. The package lets users create areas of
+    interest around a dam according to set principles. This is an
+    essential step before being able understand the comparative impact of
+    different dams.
+License: GPL (>= 3)
+Depends: 
+    R (>= 4.3)
+Imports: 
+    dplyr,
+    fasterize,
+    FNN,
+    magrittr,
+    sf,
+    smoothr,
+    terra,
+    tibble,
+    tidyr
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
 Encoding: UTF-8
+LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3

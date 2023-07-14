@@ -1,17 +1,36 @@
+#' getimpactedarea
+#' 
+#' Performs 1) standardisation of reservoir extent, 2) calculation of river course upstream and downstream and 3) clipping to river basins
 #' @export
-#' @import smoothr
-#' @import dplyr
-#' @import tidyr
+#' @importFrom smoothr smooth
+#' @importFrom dplyr mutate arrange rename .data as_tibble row_number
+#' @importFrom tidyr drop_na
 #' @import terra
 #' @import sf
 #' @import FNN
 #' @import fasterize
+#' @param reservoir An sf polygon, with an unstandardised raw reservoir
+#' @param water_bodies A rast, where 1 indicates water, NA otherwise
+#' @param dem A rast, showing elevation
+#' @param fac A rast, showing accumulated water flow along river
+#' @param basins An sf multipolygon, with the basins in the area around the dam 
+#' @param poss_expand A number, indicating the number of meters away from the raw reservoir the reservoir may expand to. Default is 20000 (20km).
+#' @param river_distance A number, indicating the number of meters downstream and upstream for the area of interest. Defaults to 100000 (100km)
+#' @param nn A number, indicating the number of nearest neighbours to consider in the algorithm to determine river course. Higher can be more accurate but is slower. Default 100.
+#' @param ac_tolerance A number, indicating the tolerance to changes in flow accumulation. Default 2, which means that if accumulated flow changes by a factor of 2 (halved or doubled) the area of interest should not include any further downstream or upstream. This is to account for confluences.
+#' @param e_tolerance A number indicating the tolerance to changes in elevation. Rivers flow downstream. But DEMs can show downstream areas of the river as higher, due to averaging nearby pixels. This is particularly true when rivers run through gorges. If there is no downstream lower river poitn nearby, the elevation tolerance allows the algorithm to select a point at a higher elevation, up to the threshold defined here.
+#' @param streambuffersize A number indicating the distance around the upstream and downstream river to consider as impacted. Defaults to 2000 (2km).
+#' @param reservoirbuffersize A number indicating the distance around the reserviur to consider as impacted. Defaults to 5000 (5km)
+#' @param wbjc A number, the water body join correction. This indicates the buffer zone for the reservoir, to ensure that it is contiguous (important where there are small channels connecting different parts of the same water body). Default is 0, but is necessary for some dams depending on the context. 
+#' 
 
 
 getimpactedarea <- function(
                           reservoir,
                           water_bodies,
-                          dem
+                          dem,
+                          fac,
+                          basins,
                           poss_expand = 20000,
                           river_distance = 100000,
                           nn = 100,
