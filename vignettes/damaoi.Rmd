@@ -1,4 +1,13 @@
 ---
+title: "damaoi"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{damaoi}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+---
 output: github_document
 ---
 
@@ -14,9 +23,6 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-
-<!-- badges: start -->
-<!-- badges: end -->
 
 This package creates an 'area of interest' around a constructed dam. 
 Dams have environmental and social impacts, both positive and negative. 

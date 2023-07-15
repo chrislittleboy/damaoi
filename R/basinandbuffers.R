@@ -1,5 +1,6 @@
 #' Buffers the reservoir and the river, and clips to basin areas
 #' @export
+#' @returns A two element list. Element 1 is an sf multipolygon with the reservoir buffer, upstream and downstream areas. Element 2 is the same, but clipped to river basin polygons.
 #' @param reservoir An sf polygon, with an unstandardised raw reservoir
 #' @param upstream An sf line, following the river upstream of the reservoir 
 #' @param downstream An sf line, following the river downstream of the reservoir 
@@ -39,5 +40,5 @@ basinandbuffers <- function(reservoir,upstream,downstream,basins,streambuffersiz
   clippedbybasin <- st_intersection(impactedarea, dissolveintersectsbasearea)
   # removes slivery unimportant polygons that make their way between the reservoirs and the rivers in the geometry operations
   clippedbybasin <- clippedbybasin[drop_units(st_area(clippedbybasin)) >= 1000,]
-  return(clippedbybasin)
+  return(list(impactedarea, clippedbybasin))
 }

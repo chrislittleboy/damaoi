@@ -1,26 +1,13 @@
 Package: damaoi
-Title: This package creates an 'area of interest' for a dam to allow
-    comparative impact evaluations
+Title: Create an 'Area of Interest' around a Constructed Dam for
+    Comparative Impact Evaluations
 Version: 0.0
 Authors@R: 
-    person("Chris", "Littleboy", "chris.littleboy@stir.ac.uk", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0002-3293-7987"))
-Description: Dams have environmental and social impacts, both positive and
-    negative. Impact evaluations today have no consistent way of
-    specifying where was impacted by dams. Reservoirs innundate land.
-    Downstream flow is reduced. Upstream fish populations are lower. But
-    when measuring impacts, how close to the reservoir should you
-    consider?How far downstream or upstream? This package formalises ways
-    of creating an area of interest around a dam. Reservoirs are
-    standardised to match satellite-observed surface water area. Upstream
-    and downstream rivers are determined using elevation data and
-    accumulated river flow. The package lets users create areas of
-    interest around a dam according to set principles. This is an
-    essential step before being able understand the comparative impact of
-    different dams.
+    person(given = "Chris", family = "Littleboy", email = "chris.littleboy@stir.ac.uk", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-3293-7987"))
+Description: This package creates an 'area of interest' around a constructed dam. Dams have environmental and social impacts, both positive and negative. Impact evaluations today have no consistent way of specifying exactly where has been impacted by dams, so impacts are measured inconsistently. This hinders our ability to compare where dams have had a higher or lower impact, and our ability to make informed infrastructure investments. Reservoirs flood land upstream of the dam. Downstream river flows are more regular and contain less sediment. Upstream fish populations are lower. These cause changes in land use and land cover around dams which can be measured using remote sensing or field data. But when measuring impacts, how close to the reservoir should you consider? How far downstream or upstream? How does the topography of the landscape, or the confluences with other rivers, change these considerations? This package facilitates adjusting reservoir polygons to match satellite-observed surface water area, plotting upstream and downstream rivers using elevation data and accumulated river flow, and drawing buffers clipped by river basins to determine the areas which could be impacted by dam construction. The package lets users create areas of interest around a dam according to set principles. This is an essential step before being able understand the comparative impact of dams. And this knowledge key to making better infrastructure investment decisions for future hydropower, irrigation and drinking water projects.
 License: GPL (>= 3)
 Depends: 
-    R (>= 4.3)
+    R (>= 4.0)
 Imports: 
     dplyr,
     FNN,
@@ -32,9 +19,12 @@ Imports:
     tibble,
     tidyr
 Suggests: 
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+VignetteBuilder: knitr

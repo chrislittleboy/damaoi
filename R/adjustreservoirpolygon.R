@@ -1,5 +1,6 @@
 #' adjust polygon of reservoir to reference surface water extent map
 #' @export
+#' @returns An sf polygon with an adjusted reservoir polygon
 #' @param reservoir An sf polygon, with an unstandardised raw reservoir
 #' @param water_bodies A rast, where 1 indicates water, NA otherwise
 #' @param dem A rast, showing elevation

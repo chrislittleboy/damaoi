@@ -2,6 +2,7 @@
 #' 
 #' Performs 1) standardisation of reservoir extent, 2) calculation of river course upstream and downstream and 3) clipping to river basins
 #' @export
+#' @returns An sf multipolygon with the reservoir buffer, upstream and downstream areas
 #' @param reservoir An sf polygon, with an unstandardised raw reservoir
 #' @param water_bodies A rast, where 1 indicates water, NA otherwise
 #' @param dem A rast, showing elevation

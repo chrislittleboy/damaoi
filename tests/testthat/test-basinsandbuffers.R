@@ -26,6 +26,8 @@ test_that("basinsandbuffers", {
                           basins = basins_tehri,
                           streambuffersize = 1500,
                           reservoirbuffersize = 3000)
-  expect_equal(sum(class(bnb) == "sf"),1)
-  expect_equal(st_area(bnb) > st_area(tehri_adjusted), TRUE)
+  expect_length(bnb, 2)
+  bnb_clip <- bnb[[2]]
+  expect_equal(sum(class(bnb_clip) == "sf"),1)
+  expect_equal(st_area(bnb_clip) > st_area(tehri_adjusted), TRUE)
 })

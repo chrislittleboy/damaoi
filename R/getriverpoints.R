@@ -1,6 +1,7 @@
 #' Calculation of river course upstream or downstream 
 #' @export
-#' @param reservoir An sf polygon, with an unstandardised raw reservoir
+#' @returns A two-element list, where the first element contains the data produced by the algorithm for all points along the river, and the second element is the sf LINESTRING object for the river 
+#' @param reservoir An sf polygon, with an un-standardised raw reservoir
 #' @param direction A string, either "upstream" or "downstream"
 #' @param dem A rast, showing elevation
 #' @param fac A rast, showing accumulated water flow along river
