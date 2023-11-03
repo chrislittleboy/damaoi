@@ -54,5 +54,16 @@ adjustreservoirpolygon <- function(reservoir, water_bodies, dem, poss_expand = 2
 # smooths this to get rid of raster edge effects
   smoothres <- smooth(polywb, method = "chaikin")
   smoothres <- st_make_valid(smoothres)
+
+# sometimes this doesn't work that well, particularly where the innundated areas are narrow, and following the path of the river.
+# in these cases, we recommend using the original reservoir
+  
+  area_new <- st_area(smoothres)
+  area_old <- st_area(reservoir)
+  area_old > area_new
+  if(area_old > area_new){
+    smoothres <- reservoir
+  }
+  
   return(smoothres)
 }

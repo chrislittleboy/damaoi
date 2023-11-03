@@ -12,11 +12,10 @@ basinandbuffers <- function(reservoir,upstream,downstream,basins,streambuffersiz
   # ensures colnames of sfs correct
   colnames(downstream)[1] <- colnames(upstream)[1] <- "geometry"
   st_geometry(downstream) <- st_geometry(upstream) <- "geometry"
-  reservoir <- reservoir[,1]
   # combines reservoir and stream lines
-  basearea <- rbind(reservoir,upstream,downstream)
+  basearea <- rbind(reservoir$geometry,upstream,downstream)
   # buffers the reserrvoir by buffer size parameter.
-  bufferreservoir <- st_buffer(reservoir, reservoirbuffersize)
+  bufferreservoir <- st_buffer(reservoir$geometry, reservoirbuffersize)
   #buffers upstream by streambuffer parameter
   # areas which intersect with the reservoir buffer are excluded 
   usb <- getstreambuffers(line = upstream,reservoir = bufferreservoir, buffer_size = streambuffersize)[,1]

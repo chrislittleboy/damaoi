@@ -10,6 +10,7 @@ aoi <- getimpactedarea(
   dem = dem_tehri,
   fac = fac_tehri,
   basins = basins_tehri,
+  tocrop = F,
   poss_expand = 10000,
   river_distance = 10000,
   nn = 100,

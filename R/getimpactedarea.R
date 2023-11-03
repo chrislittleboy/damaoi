@@ -24,6 +24,7 @@ getimpactedarea <- function(
                           dem,
                           fac,
                           basins,
+                          tocrop,
                           poss_expand = 20000,
                           river_distance = 100000,
                           nn = 100,
@@ -35,8 +36,15 @@ getimpactedarea <- function(
   
   # attempts to correct for invalid geometries for the input polygon
   reservoir <- reservoir %>% st_make_valid()
+  if(tocrop == T){
+  cropped <- cropdata(reservoir = reservoir, 
+                      dem = dem, fac = fac, water_bodies = water_bodies, basins = basins, 
+                      river_distance = river_distance)
+  dem <- cropped[[1]]; fc <- cropped[[2]]; wb <- cropped[[3]]; basins <- cropped[[4]]
+  }
   # adjusts the surface area of the reservoir with satellite-observed surface water to ensure consistency.
-  reservoir <- adjustreservoirpolygon(reservoir = reservoir, water_bodies = water_bodies, poss_expand = poss_expand, dem = dem, wbjc = wbjc)
+  reservoir <- adjustreservoirpolygon(reservoir = reservoir, water_bodies = water_bodies, dem = dem,
+                                      poss_expand = poss_expand,wbjc = wbjc)
   # draws river points downstream  
   down <- getriverpoints(reservoir = reservoir,
                          direction = "downstream",
@@ -65,6 +73,6 @@ getimpactedarea <- function(
                                   reservoirbuffersize = reservoirbuffersize)
   
   # 'smooths' final polygon to remove jagged edges due to raster processing
-  impactedarea <- smooth(impactedarea, method = "ksmooth", smoothness = 3)
+  impactedarea <- smooth(impactedarea[[2]], method = "ksmooth", smoothness = 3)
   return(impactedarea)
 }
