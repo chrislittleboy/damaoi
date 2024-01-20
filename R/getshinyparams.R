@@ -7,8 +7,6 @@
 #' @import shinydashboard
 #' @param res An sf polygon, with an unstandardised raw reservoir
 
-
-
 getshinyparams <- function(res){
   ui1 <- fluidPage(
     titlePanel("Pour out point (dam location)"),
@@ -51,7 +49,8 @@ getshinyparams <- function(res){
         coordinates$latitude <- click$lat
         coordinates$longitude <- click$lng
       }
-      assign("pour", unlist(isolate(reactiveValuesToList(coordinates))), envir=as.environment(1))
+      pour <- unlist(isolate(reactiveValuesToList(coordinates)))
+      pour <<- unlist(isolate(reactiveValuesToList(coordinates)))
     })
     output$simple_box <- renderValueBox({
       valueBox(
