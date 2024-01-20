@@ -10,6 +10,9 @@ getimpactedarea(
   dem,
   fac,
   basins,
+  pourpoints,
+  tocrop = T,
+  toadjust = F,
   poss_expand = 20000,
   river_distance = 1e+05,
   nn = 100,
@@ -31,6 +34,12 @@ getimpactedarea(
 
 \item{basins}{An sf multipolygon, with the basins in the area around the dam}
 
+\item{pourpoints}{An sf multipoint, showing the points where rivers flow in and out of reservoirs}
+
+\item{tocrop}{A true/false parameter whether crop all input rasters by the river distance}
+
+\item{toadjust}{A true/false parameter whether to adjust the reservoir to surrounding water bodies}
+
 \item{poss_expand}{A number, indicating the number of meters away from the raw reservoir the reservoir may expand to. Default is 20000 (20km).}
 
 \item{river_distance}{A number, indicating the number of meters downstream and upstream for the area of interest. Defaults to 100000 (100km)}
@@ -46,6 +55,9 @@ getimpactedarea(
 \item{reservoirbuffersize}{A number indicating the distance around the reserviur to consider as impacted. Defaults to 5000 (5km)}
 
 \item{wbjc}{A number, the water body join correction. This indicates the buffer zone for the reservoir, to ensure that it is contiguous (important where there are small channels connecting different parts of the same water body). Default is 0, but is necessary for some dams depending on the context.}
+}
+\value{
+An sf multipolygon with the reservoir buffer, upstream and downstream areas
 }
 \description{
 Performs 1) standardisation of reservoir extent, 2) calculation of river course upstream and downstream and 3) clipping to river basins

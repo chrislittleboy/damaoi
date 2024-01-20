@@ -26,6 +26,9 @@ basinandbuffers(
 
 \item{reservoirbuffersize}{A number indicating the distance around the reserviur to consider as impacted. Defaults to 5000 (5km)}
 }
+\value{
+A two element list. Element 1 is an sf multipolygon with the reservoir buffer, upstream and downstream areas. Element 2 is the same, but clipped to river basin polygons.
+}
 \description{
 Buffers the reservoir and the river, and clips to basin areas
 }

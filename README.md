@@ -6,38 +6,21 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-This package creates an ‘area of interest’ around a constructed dam.
-Dams have environmental and social impacts, both positive and negative.
-Impact evaluations today have no consistent way of specifying exactly
-where has been impacted by dams, so impacts are measured inconsistently.
-This hinders our ability to compare where dams have had a higher or
-lower impact, and our ability to make informed infrastructure
-investments. Reservoirs flood land upstream of the dam. Downstream river
-flows are more regular and contain less sediment. Upstream fish
-populations are lower. These cause changes in land use and land cover
-around dams which can be measured using remote sensing or field data.
-But when measuring impacts, how close to the reservoir should you
-consider? How far downstream or upstream? How does the topography of the
-landscape, or the confluences with other rivers, change these
-considerations? This package facilitates adjusting reservoir polygons to
-match satellite-observed surface water area, plotting upstream and
-downstream rivers using elevation data and accumulated river flow, and
-drawing buffers clipped by river basins to determine the areas which
-could be impacted by dam construction. The package lets users create
-areas of interest around a dam according to set principles. This is an
-essential step before being able understand the comparative impact of
-dams. And this knowledge key to making better infrastructure investment
-decisions for future hydropower, irrigation and drinking water projects.
+# The “damAOI” application
 
-## Installation
+This paper introduces the “damAOI” application which allows researchers
+to create AOIs which are at the same time locally nuanced and consistent
+across contexts. We use data sources on elevation, river flow, water
+bodies and dam construction sites to allow researchers to
+programmatically define their AOIs. The application was written in
+statistical software *R* and is designed to help standardize the way we
+consider the impacts of dams. Specifically, it programmatically
+determines an Area of Interest (AOI) around a dam for which impacts are
+measured. The previous section discusses the issues with existing
+approaches: bounding boxes, buffers, and basins. Our application address
+the issues through combining existing methods.
 
-You can install the latest version of damaoi from CRAN using:
-
-``` r
-install.packages("damaoi")
-```
-
-## Overview
+## Dependencies
 
 The software relies on openly available spatial data, specifically:
 
@@ -46,168 +29,223 @@ The software relies on openly available spatial data, specifically:
   dataset](https://sedac.ciesin.columbia.edu/data/collection/grand-v1/methods).
 - The polygons of river basins derived by
   [HydroBASINS](https://www.hydrosheds.org/products/hydrobasins).
-- Elevation and accumulated river flow data derived from
+- Digital Elevation Model (DEM) and Flow ACcumulation (FAC) data from
   [HydroSHEDS](https://www.hydrosheds.org/hydrosheds-core-downloads).
 - Surface water extent data from the [European Space Agency (ESA)
   Climate Change Initiative
   (CCI)](https://www.esa-landcover-cci.org/?q=node/162).
 
-There are three stages to the process of creating an impacted area.
+It also depends on serveral existing R packages, including:
+
+- *terra*, a package for working with raster data.
+
+- *sf*, a package for working with polygon data.
+
+- *smoothr*, a package to ‘smooth’ polygons.
+
+- *FNN*, a package for fast calculation of nearest neighbours.
+
+- *shiny* and *leaflet*, facilitating an interactive map to generate
+  input data.
+
+- Various packages within the *tidyverse* for data manipulation and
+  processing.
+
+After preparing the input data, there are three stages to the process of
+creating an impacted area.
 
 1)  Standardising the reservoir polygon;
 2)  Building upstream and downstream lines to track rivers;
 3)  Creating buffer zones around the reservoir and river lines, taking
     into account river basins.
 
-This will demonstrate this for one dam: Tehri in Uttarakhand, India.
+## Preparation stage: define pour points
 
-### Stage 1: adjust reservoir polygon to match water bodies
+Pour points are the locations where rivers pour into and out of
+reservoirs. For many reservoirs, pour points can be found automatically.
+The pour in point(s) – where the upstream river(s) join reservoirs –
+typically experience the largest difference in accumulated flow, which
+can be computed directly from FAC hydrology data. The pour out point –
+the dam location – is often known. This can also be derived using the
+maximum FAC value of the reservoir.
 
-One normally gets the polygons of dam reservoirs from the excellent
-GRanD database. However, some polygons are inconsistent with true water
-extent of reservoirs. This is largely because of inconsistencies in the
-time of year that reservoir extents are measured. The first step is to
-*adjust* the polygon to match water cover of one consistent source. We
-suggest the CCI Global Water Bodies dataset, for larger dams the
-300m<sup>2</sup> resolution is sufficient, and the globally consistent
-algorithm is key.
+For other reservoirs, pour points need to be determined by users and in
+our package we have developed a Shiny app which lets users select pour
+points using a leaflet map. This has been developed primarily for
+run-of-river dams, which typically see a small swelling of the river for
+a large distance upstream of the dam, rather than a more static lake
+system. This feature makes finding the pour in points automatically
+using FAC data impossible. The app can also help in circumstances when
+many rivers feed into a single reservoir, and users want to understand
+the upstream impacts for multiple upstream areas.
+
+Figure @ref(fig:pourpoints) shows the pour points for Tehri dam which
+have been found automatically using FAC data.
+
+## Stage 1: adjust reservoir polygon to match water bodies
+
+Polygons of dam reservoirs are usually obtained from global
+georeferenced datasets. Some polygons in these datasets are inconsistent
+with true water extent of reservoirs, largely because of inconsistencies
+in the time of year that reservoir extents are measured. The first step
+is to *adjust* the polygon to match water cover of one consistent
+source. We suggest the CCI Global Water Bodies dataset, for larger dams
+the 300m<sup>2</sup> resolution is sufficient, and the globally
+consistent algorithm for determining surface water extent is key.
 
 ``` r
-library(devtools)
-#> Loading required package: usethis
-load_all()
-#> ℹ Loading damaoi
-tehri_cci <- rast(system.file("extdata", "wb_tehri.tif", package="damaoi"))
-tehri_grand <- damaoi::tehri
-plot(tehri_cci)
-plot(tehri_grand, col = "black", add = T)
-```
-
-<img src="man/figures/README-s1-1.png" width="100%" />
-
-Here, the dam is the most southerly point. To the east, there was a
-joining valley which was also inundated by water following the dam. The
-first function takes two arguments, the grand polygon and the reference
-surface water dataset, and ‘corrects’ the polygon.
-
-``` r
+library(terra)
+library(sf)
+requireNamespace("ggplot2", quietly = TRUE)
+devtools::load_all()
+tehri_wb <- rast(system.file("extdata", "wb_tehri.tif", package="damaoi"))
 tehri_dem <- rast(system.file("extdata", "dem_tehri.tif", package="damaoi"))
-tehri_adjusted <- adjustreservoirpolygon(reservoir = tehri_grand, water_bodies = tehri_cci, dem = tehri_dem)
-par(mfrow = c(1,2))
-plot(st_geometry(tehri_grand), main = "Original", xlim = st_bbox(tehri_adjusted)[c(1, 3)], ylim = st_bbox(tehri_adjusted)[c(2, 4)])
-plot(st_geometry(tehri_adjusted), main = "Adjusted")
+tehri_adjusted <- adjustreservoirpolygon(tehri, tehri_wb, tehri_dem, 20000, 0)
+ggplot2::ggplot() + 
+  ggplot2::geom_sf(data = tehri_adjusted, fill = "skyblue", col = "skyblue") +
+  ggplot2::geom_sf(data = tehri, fill = "blue", col = "blue")
 ```
 
-<img src="man/figures/README-s1_adjusted-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
 
-This gives a truer sense of the inundated land following the reservoir.
+Tehri Dam is the most southerly point of the yellow polygon, which was
+taken directly from the GRanD dataset. To the east, there is a joining
+valley which was also inundated by water following the dam, but which is
+not included in the GRanD data. The *adjustreservoirpolygon* function
+takes three arguments, the reference polygon and the surface water
+raster, and ‘corrects’ the polygon. This ensures that the reservoir
+polygon accurately reflects the true reservoir extent following the
+construction of the dam.
 
 ## Stage 2: find upstream and downstream lines
 
 The second stage of the process it to draw a line to follow the river
-downstream/upstream of the dam. Those interested in understanding
-downstream/upstream impacts can use the rivers, represented digitally as
-LINESTRINGS, to inform their impact evaluations. To map the river paths
-digitally, we build an algorithm using Digital Elevation Model (DEM)
-data and Flow ACumulation data (FAC). We recommend using HydroSHEDS 15s
-data.
+downstream and upstream areas of the reservoir. Those interested in
+understanding downstream or upstream impacts must use these rivers,
+represented digitally as LINESTRINGS, to inform their impact
+evaluations. To map the river paths digitally, we built an algorithm
+using Digital Elevation Model (DEM) data and Flow ACumulation data
+(FAC). We recommend using HydroSHEDS 15s data as input data for the
+algorithm.
 
 DEM measures the average elevation in each grid cell. FAC values are
 unitless, and simply measure the aggregated number of cells (in this
 case ~450m grid cells) that have accumulated to form the river at each
-cell. So if a river was 200 cells long, and was joined by another 300
-cells long, the flow accumulation one cell downstream of the confluence
-would be 501.
-
-``` r
-
-tehri_fac <- rast(system.file("extdata", "fac_tehri.tif", package="damaoi"))
-par(mfrow = c(1,2))
-plot(tehri_dem, main = "DEM (m)")
-plot(st_geometry(tehri_adjusted), add = T)
-plot(tehri_fac/1000, main = "FAC ('000)")
-plot(st_geometry(tehri_adjusted), add = T)
-```
-
-<img src="man/figures/README-s2_fac_demo-1.png" width="100%" />
-
-This shows the DEM and the FAC around Tehri dam. For reference, at the
-end of the Ganges, the ultimate destination for water downstream of
-Tehri, the accumulated flow is 8.24 million.
+cell. If a river was 200 cells long, and was joined by another 300 cells
+long, the flow accumulation one cell downstream of the confluence would
+be 501.
 
 For the downstream river line the algorithm begins at the point in the
 reservoir with the highest accumulation. It searches nearby grid cells
-which are ‘water’. And selects the nearest point with a higher
-accumulation and a lower elevation. This is an iterative process, for as
-far downstream as the user wishes to consider. For us, the default is
-100km downstream.
+in the FAC data which are ‘water’ and selects the nearest point with a
+higher accumulation and a lower elevation. This is an iterative process,
+and continues for as far downstream as the user wishes to consider. For
+us, the default is 100km downstream.
 
 For the upstream river line the algorithm begins at the point in the
 reservoir with the lowest accumulation. It searches nearby points which
 have water of a similar accumulation (to eliminate the river being
-diverted to insignificant upstream springs). And selects the nearest
-point with a lower accumulation and a higher elevation, again to 100km.
+diverted to insignificant upstream springs). Of these cells, it selects
+the nearest point with a lower accumulation and a higher elevation. This
+process is again repeated iteratively up to a set distance away from the
+reservoir.
 
 ``` r
+tehri_fac <- rast(system.file("extdata", "fac_tehri.tif", package="damaoi"))
+pourpoints <- autogetpourpoints(tehri_adjusted, tehri_fac)
+ppid <- as.vector(1:nrow(pourpoints), mode = "list")
+riverpoints <- lapply(X = ppid, FUN = getriverpoints, 
+                      reservoir = tehri_adjusted, 
+                      pourpoints = pourpoints,
+                      river_distance = 100000,
+                      ac_tolerance = 50,
+                      e_tolerance = 10, 
+                      nn = 100, 
+                      fac = tehri_fac,
+                      dem = tehri_dem)
+riverpoints[sapply(riverpoints, is.null)] <- NULL 
+# if pour points have very small river distances flowing into them, they will be NULL elements in the list of riverpoints
+# this removes the NULL values
+riverlines <- pointstolines(riverpoints)
 
-# warning for long runtime! 
-
-upriver <- getriverpoints(reservoir = tehri_adjusted, direction = "upstream", river_distance =100000, ac_tolerance = 2, e_tolerance = 5, nn = 100, fac = tehri_fac, dem = tehri_dem)
-downriver <- getriverpoints(reservoir = tehri_adjusted, direction = "downstream", river_distance =100000, ac_tolerance = 2, e_tolerance = 5, nn = 100, fac = tehri_fac, dem = tehri_dem)
-plot(st_geometry(tehri_adjusted), col = "black", xlim = c(78,79), ylim = c(30,31), main = "River lines")
-plot(upriver[[2]], add = T, col = "darkgreen")
-plot(downriver[[2]], add = T, col = "red")
-plot(tehri_dem, add = T, alpha = 0.5, main = "River lines", legend = F, xlim = c(78,79), ylim = c(30,31))
+ggplot2::ggplot(tehri_adjusted) +
+  ggplot2::geom_sf() +
+  ggplot2::geom_sf(data = riverlines[[1]], col = "red") +
+  ggplot2::geom_sf(data = riverlines[[2]], col = "blue")
 ```
 
-<img src="man/figures/README-s2_riverlines-1.png" width="100%" />
-Upstream is shown by the blue line, travelling 100km north then east
-from the reservoir into the high Himalaya. Downstream is shown by the
-red line travelling south from the reservoir towards Devprayag. The red
-line is shorter than the blue line, because the river meets a confluence
-where the Brahmaputra meets the Alakhnanda to form the Ganges. This is a
-termination point for the algorithm, because any downstream effects
-further than this are a result of changes to bother river systems, and
-cannot be isolated to be caused by Tehri dam. The river distances and
-the acceptable increase in river flow accumulation due to confluences
-are set by the user of this tool.
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
-### Stage 3: draw buffers around reservoir and river lines, and clip to river basins
+Upstream is indicated by the red line. Downstream is shown by the blue
+line travelling south from the reservoir towards Devprayag where there
+is a confluence.
+
+The *autogetpourpoints* function gets pour points for the reservoir
+using the flow accumulation values from hydrological data. This is only
+possible for dams which are not ‘run of the river’ and for reservoirs
+with one input river.
+
+Water bodies have a FAC value and an elevation value. The *riverpoints*
+function begins an algorithm which finds the next point in the river
+iteratively, searching for points downstream (upstream) which have lower
+(higher) elevation and a higher (lower) FAC. The river_distance
+parameter sets how far upstream and downstream to follow the river. The
+nn parameter sets the number of nearest neighbours (water bodies) to
+assess for these conditions. The ac_tolerance parameter sets a threshold
+for the point-to-point flow accumulation increase. This is so that at
+major confluences the algorithm will stop finding points downstream. We
+can see for Tehri that the downstream line is shorter than the blue
+line. This is because of a river confluence, where the Bhagirathi (the
+river running through Tehri) meets the Alakhnanda to form the Ganges. At
+this point, the Alakhnanda has accumulated more water than the
+Bhagirathi. This is a termination point for the algorithm. Any
+downstream effects further than this are a result of changes to both
+river systems, and cannot be attributed to the construction of Tehri
+dam. The e_tolerance parameter sets a threshold for the acceptable
+elevation increase if there are no points downstream (upstream) which
+have a lower (higher) elevation. This is important as downstream points
+can erroneously have a slightly higher elevation value in steep gorges
+because DEM values are an average across an area which can be larger
+than the width of rivers.
+
+The *pointstolines* function converts the points and associated
+information generated by *riverpoints* to an sf linestring.
+
+## Stage 3: draw buffers around reservoir and river lines, and clip to river basins
 
 After we have drawn the river lines, we need to create a zone around the
 rivers and reservoir, representing how far around the rivers (and
 reservoir) we consider having been potentially impacted by the dam. This
 is in many parts a subjective choice, faced by anyone conducting spatial
 analysis. In our view there are a range of acceptable decisions, and
-some will be more appropriate in certain contexts than others. For
-comparative analysis, however, the important factor is consistency. For
-the impacts of one dam to be compared against the impacts of a different
+some will be more appropriate in certain contexts than others. For the
+impacts of one dam to be compared against the impacts of a different
 dam, the buffer zones need to be equivalent. We set default buffers are
-2km around rivers, and 5km around reservoirs. River basins are
-determined by the topography. If rain falls on a mountain with two
-slopes, an east and a west aspect, either side of a knife-edge ridge,
-the water will accumulate into two separate river systems. If a buffer
-from a river in the east system strays into the west system, we will
-pick up changes which have very little to do with the construction of
-the dam. For this reason, we clip the buffers to the basins which
-intersect with the areas of the rivers and reservoir.
+2km around rivers, and 5km around reservoirs.
+
+To deal with the *topography issue* we then clip this buffer to the
+river basins. We first select the river basins which intersect the
+reservoir and river lines calculated in stages 1 and 2. Then we clip the
+buffers to these polygons.
 
 ``` r
-tehri_basins <- damaoi::basins_tehri
-impacted_area <- basinandbuffers(tehri_adjusted, upriver[[2]], downriver[[2]], tehri_basins, 2000,5000)
-plot(st_union(impacted_area[[1]]), col = "yellow", xlim = c(78,79), ylim = c(30,31), main = "Buffer and clip to basin areas")
-plot(st_union(impacted_area[[2]]), add = T, col = "skyblue", xlim = c(78,79), ylim = c(30,31))
-plot(tehri_basins[st_buffer(impacted_area[[1]], 10000),], xlim = c(78,79), ylim = c(30,31), col = NA, add =T, alpha = 0.3, border = "darkgrey")
-plot(st_geometry(tehri_adjusted), col = "black", xlim = c(78,79), ylim = c(30,31), main = "River lines", add = T)
-plot(upriver[[2]], add = T, col = "black")
-plot(downriver[[2]], add = T, col = "black")
+bnb <- basinandbuffers(
+  reservoir = tehri_adjusted,
+  upstream = riverlines[[1]],
+  downstream = riverlines[[2]],
+  basins = basins_tehri,
+  streambuffersize = 1500,
+  reservoirbuffersize = 3000)
+ggplot2::ggplot(bnb[[1]] %>% mutate(area = c("res", "down", "up"))) +
+  ggplot2::geom_sf(ggplot2::aes(fill = as.factor(area)), alpha = 0.3) +
+  ggplot2::geom_sf(data = bnb[[2]] %>% mutate(area = c("res", "down", "up")),
+          ggplot2::aes(fill = as.factor(area))) +
+  ggplot2::geom_sf(data = tehri_adjusted, fill = "grey")
 ```
 
-<img src="man/figures/README-s3-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
-This shows the buffer zone in yellow, overlaid by the clipped buffer
-zone in blue. The borders of river basins are shown in dark grey, and
-the reservoir and rivers are in black. Any impacts in yellow areas, due
-to elevated land seperating these areas from blue areas, are not
-impacted by the reservoir or changes in the river following dam
-construction.
+The *bnb* function extracts buffers for the lines and reservoir first.
+Second, it clips these areas by the river basins, so that areas beyond
+topographical barriers to water are not considered. Here shows the
+overlay of clipped polygons and the buffers themselves.

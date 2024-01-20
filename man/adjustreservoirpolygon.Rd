@@ -23,6 +23,9 @@ adjustreservoirpolygon(
 
 \item{wbjc}{A number, the water body join correction. This indicates the buffer zone for the reservoir, to ensure that it is contiguous (important where there are small channels connecting different parts of the same water body). Default is 0, but is necessary for some dams depending on the context.}
 }
+\value{
+An sf polygon with an adjusted reservoir polygon
+}
 \description{
 adjust polygon of reservoir to reference surface water extent map
 }

@@ -9,9 +9,6 @@
 #' @param reservoirbuffersize A number indicating the distance around the reserviur to consider as impacted. Defaults to 5000 (5km)
 
 basinandbuffers <- function(reservoir,upstream,downstream,basins,streambuffersize,reservoirbuffersize){
-  # ensures colnames of sfs correct
-  colnames(downstream)[1] <- colnames(upstream)[1] <- "geometry"
-  st_geometry(downstream) <- st_geometry(upstream) <- "geometry"
   # combines reservoir and stream lines
   basearea <- rbind(reservoir$geometry,upstream,downstream)
   # buffers the reserrvoir by buffer size parameter.
@@ -38,6 +35,6 @@ basinandbuffers <- function(reservoir,upstream,downstream,basins,streambuffersiz
   # and get the intersection with the buffered area
   clippedbybasin <- st_intersection(impactedarea, dissolveintersectsbasearea)
   # removes slivery unimportant polygons that make their way between the reservoirs and the rivers in the geometry operations
-  clippedbybasin <- clippedbybasin[drop_units(st_area(clippedbybasin)) >= 1000,]
+  clippedbybasin <- clippedbybasin[units::drop_units(st_area(clippedbybasin)) >= 1000,]
   return(list(impactedarea, clippedbybasin))
 }

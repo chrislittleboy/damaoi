@@ -7,7 +7,10 @@
 #' @param water_bodies A rast, where 1 indicates water, NA otherwise
 #' @param dem A rast, showing elevation
 #' @param fac A rast, showing accumulated water flow along river
-#' @param basins An sf multipolygon, with the basins in the area around the dam 
+#' @param pourpoints An sf multipoint, showing the points where rivers flow in and out of reservoirs
+#' @param basins An sf multipolygon, with the basins in the area around the dam
+#' @param tocrop A true/false parameter whether crop all input rasters by the river distance
+#' @param toadjust A true/false parameter whether to adjust the reservoir to surrounding water bodies
 #' @param poss_expand A number, indicating the number of meters away from the raw reservoir the reservoir may expand to. Default is 20000 (20km).
 #' @param river_distance A number, indicating the number of meters downstream and upstream for the area of interest. Defaults to 100000 (100km)
 #' @param nn A number, indicating the number of nearest neighbours to consider in the algorithm to determine river course. Higher can be more accurate but is slower. Default 100.
@@ -24,7 +27,9 @@ getimpactedarea <- function(
                           dem,
                           fac,
                           basins,
-                          tocrop,
+                          pourpoints,
+                          tocrop = T,
+                          toadjust = F,
                           poss_expand = 20000,
                           river_distance = 100000,
                           nn = 100,
@@ -42,37 +47,41 @@ getimpactedarea <- function(
                       river_distance = river_distance)
   dem <- cropped[[1]]; fc <- cropped[[2]]; wb <- cropped[[3]]; basins <- cropped[[4]]
   }
+  if(toadjust == T){
   # adjusts the surface area of the reservoir with satellite-observed surface water to ensure consistency.
-  reservoir <- adjustreservoirpolygon(reservoir = reservoir, water_bodies = water_bodies, dem = dem,
-                                      poss_expand = poss_expand,wbjc = wbjc)
-  # draws river points downstream  
-  down <- getriverpoints(reservoir = reservoir,
-                         direction = "downstream",
-                         river_distance = river_distance,
-                         nn = nn,
-                         ac_tolerance = ac_tolerance,
-                         e_tolerance = e_tolerance,
-                         fac = fac,
-                         dem = dem)
-  # draws river points upstream
-  up <- getriverpoints(reservoir = reservoir,
-                       direction = "upstream",
-                       river_distance = river_distance,
-                       nn = nn,
-                       ac_tolerance = ac_tolerance,
-                       e_tolerance = e_tolerance,
-                       fac = fac,
-                       dem = dem)
+  reservoir <- adjustreservoirpolygon(reservoir = reservoir, 
+                                      water_bodies = water_bodies, 
+                                      dem = dem,
+                                      poss_expand = poss_expand,
+                                      wbjc = wbjc)
+  }
+  # draws river points from pour points 
+
+  ppids <- as.vector(1:nrow(pourpoints), mode = "list")
+  riverpoints <-  lapply(
+         X = ppids,
+         FUN = getriverpoints,
+         reservoir = reservoir,
+         pourpoints = pourpoints,
+         river_distance = river_distance,
+         nn = nn,
+         ac_tolerance = ac_tolerance,
+         e_tolerance = e_tolerance,
+         fac = fac,
+         dem = dem)
+
+  riverlines <- pointstolines(riverpoints = riverpoints)
 
   #creates buffers and clips to basins
+  
   impactedarea <- basinandbuffers(reservoir = reservoir, 
-                                  upstream = up[[2]], 
-                                  downstream = down[[2]],
+                                  upstream = riverlines[[1]], 
+                                  downstream = riverlines[[2]],
                                   basins = basins,
                                   streambuffersize = streambuffersize,
                                   reservoirbuffersize = reservoirbuffersize)
   
   # 'smooths' final polygon to remove jagged edges due to raster processing
-  impactedarea <- smooth(impactedarea[[2]], method = "ksmooth", smoothness = 3)
+  impactedarea <- smoothr::smooth(impactedarea[[2]], method = "ksmooth", smoothness = 3)
   return(impactedarea)
 }

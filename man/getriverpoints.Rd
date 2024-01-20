@@ -2,11 +2,12 @@
 % Please edit documentation in R/getriverpoints.R
 \name{getriverpoints}
 \alias{getriverpoints}
-\title{Calculation of river course upstream or downstream}
+\title{Calculation of river points}
 \usage{
 getriverpoints(
   reservoir,
-  direction,
+  pourpoints,
+  ppid,
   river_distance,
   ac_tolerance,
   e_tolerance,
@@ -18,7 +19,9 @@ getriverpoints(
 \arguments{
 \item{reservoir}{An sf polygon, with an unstandardised raw reservoir}
 
-\item{direction}{A string, either "upstream" or "downstream"}
+\item{pourpoints}{An sf multipoint, showing the points where rivers flow in and out of reservoirs}
+
+\item{ppid}{An integer to index through the pourpoints dataframe}
 
 \item{river_distance}{A number, indicating the number of meters downstream and upstream for the area of interest. Defaults to 100000 (100km)}
 
@@ -32,6 +35,9 @@ getriverpoints(
 
 \item{dem}{A rast, showing elevation}
 }
+\value{
+A three-element list, where the first element contains the data produced by the algorithm for all points along the river, and the second element is the sf LINESTRING object for the river, and the third denotes whether the river goes upstream (0) or downstream (1)
+}
 \description{
-Calculation of river course upstream or downstream
+Calculation of river points
 }
