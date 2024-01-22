@@ -7,7 +7,7 @@ Authors@R: c(
            comment = c(ORCID = "0000-0002-3293-7987")),
     person("Isabel", "Jones", , "i.l.jones@stir.ac.uk", role = c("ctb", "fnd"))
   )
-Description: This package creates an 'area of interest' around a constructed dam. Dams have environmental and social impacts, both positive and negative. Impact evaluations today have no consistent way of specifying exactly where has been impacted by dams, so impacts are measured inconsistently. This package facilitates methods to adjust reservoir polygons to match satellite-observed surface water areas, plot upstream and downstream rivers using elevation data and accumulated river flow, and draw buffers clipped by river basins. This helps to determine the areas which could be impacted by dam construction facilitating comparative analysis.
+Description: Define a spatial 'area of interest' around a constructed dam using hydrological data. Dams have environmental and social impacts, both positive and negative. Impact evaluations today have no consistent way of specifying exactly where has been impacted by dams and as a result impacts are measured inconsistently. 'damAOI' implements methods to adjust reservoir polygons to match satellite-observed surface water areas, plot upstream and downstream rivers using elevation data and accumulated river flow, and draw buffers clipped by river basins around reservoirs and relevant rivers. This helps to determine the areas which could be impacted by dam construction and facilitates comparative analysis.
 License: GPL (>= 3)
 Depends: 
     R (>= 4.0)
