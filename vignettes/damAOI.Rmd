@@ -83,8 +83,8 @@ library(sf)
 library(damAOI)
 
 requireNamespace("ggplot2", quietly = TRUE)
-tehri_wb <- rast(system.file("extdata", "wb_tehri.tif", package="damaoi"))
-tehri_dem <- rast(system.file("extdata", "dem_tehri.tif", package="damaoi"))
+tehri_wb <- rast(system.file("extdata", "wb_tehri.tif", package="damAOI"))
+tehri_dem <- rast(system.file("extdata", "dem_tehri.tif", package="damAOI"))
 tehri_adjusted <- adjustreservoirpolygon(tehri, tehri_wb, tehri_dem, 20000, 0)
 ggplot2::ggplot() + 
   ggplot2::geom_sf(data = tehri_adjusted, fill = "skyblue", col = "skyblue") +
@@ -121,7 +121,7 @@ This process is again repeated iteratively up to a set distance away from the re
 
 
 ```{r}
-tehri_fac <- rast(system.file("extdata", "fac_tehri.tif", package="damaoi"))
+tehri_fac <- rast(system.file("extdata", "fac_tehri.tif", package="damAOI"))
 pourpoints <- autogetpourpoints(tehri_adjusted, tehri_fac)
 # See commented code at the end of the document for the process to get pour points manually
 

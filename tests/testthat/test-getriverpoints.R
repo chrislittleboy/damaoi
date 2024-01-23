@@ -1,7 +1,7 @@
 test_that("getriverpoints_checks", {
-  tehri_fac <- rast(system.file("extdata", "fac_tehri.tif", package="damaoi"))
-  tehri_wb <- rast(system.file("extdata", "wb_tehri.tif", package="damaoi"))
-  tehri_dem <- rast(system.file("extdata", "dem_tehri.tif", package="damaoi"))
+  tehri_fac <- rast(system.file("extdata", "fac_tehri.tif", package="damAOI"))
+  tehri_wb <- rast(system.file("extdata", "wb_tehri.tif", package="damAOI"))
+  tehri_dem <- rast(system.file("extdata", "dem_tehri.tif", package="damAOI"))
   tehri <- adjustreservoirpolygon(tehri, tehri_wb, tehri_dem, 20000, 0)
   pourpoints <- autogetpourpoints(tehri, tehri_fac)
   ppid <- as.vector(1:nrow(pourpoints), mode = "list")
