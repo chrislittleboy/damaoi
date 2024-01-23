@@ -25,8 +25,8 @@ adjustreservoirpolygon <- function(reservoir, water_bodies, dem, poss_expand = 2
 # gets the min/max elevation for the reservoir area
   minmaxelev <- rr * demcrop
 # and extracts minimums/maximums
-  mi <- min(minmaxelev[], na.rm = T)
-  ma <- max(minmaxelev[], na.rm = T)
+  mi <- min(minmaxelev[], na.rm = TRUE)
+  ma <- max(minmaxelev[], na.rm = TRUE)
 # filters the expand so only areas between the minimum and maximum reservoir area are potentially expandable areas
   demcrop[demcrop > ma] <- NA
   demcrop[demcrop < mi] <- NA
@@ -45,7 +45,7 @@ adjustreservoirpolygon <- function(reservoir, water_bodies, dem, poss_expand = 2
   polywb <- aggregate(makeValid(polywb))
 # Converts to an sf polygon
   polywb <- st_as_sf(polywb) %>% 
-    st_cast("POLYGON", warn = F) %>% 
+    st_cast("POLYGON", warn = FALSE) %>% 
     mutate(id = row_number())
 # caluculates the area of all the water bodies  
   polywb$area <- polywb %>% st_area()

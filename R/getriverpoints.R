@@ -33,12 +33,12 @@ getriverpoints <- function(reservoir,
   pourpoint <- pourpoints[ppid,]
   st_crs(pourpoint) <- st_crs(reservoir)
   fac_pp <- terra::extract(x = fac_dam, y = vect(st_buffer(pourpoint, 1000)))
-  mx <- max(fac_pp, na.rm = T)
-  mn <- min(fac_pp, na.rm = T)
+  mx <- max(fac_pp, na.rm = TRUE)
+  mn <- min(fac_pp, na.rm = TRUE)
   mnmx <- minmax(fac_dam)
   mx <- ifelse(is.na(mx), mnmx[2],mx)
   if(mx < 1000) {
-    print("River extension too small")
+    warning("River extension too small")
     return(NULL)}
   mn <- ifelse(is.na(mn), mnmx[1],mx)
   fac_damextent <- fac_dam * dam_binary
@@ -81,11 +81,11 @@ getriverpoints <- function(reservoir,
   }
   # removes areas with under 1000 FAC values (to remove small stream points)
   fac_dam[fac_dam <= 1000] <- NA
-  fac_sf <- terra::as.data.frame(fac_dam, xy = T) %>% st_as_sf(coords = c("x","y")) %>% drop_na() %>% rename(ac = names(fac_dam))
+  fac_sf <- terra::as.data.frame(fac_dam, xy = TRUE) %>% st_as_sf(coords = c("x","y")) %>% drop_na() %>% rename(ac = names(fac_dam))
   # matches the crs with the dam crs
   st_crs(fac_sf) <- st_crs(reservoir)
   # extracts the elevation information
-  dem_sf <- terra::as.data.frame(dem_dam, xy = T) %>% st_as_sf(coords = c("x","y")) %>% drop_na() %>% rename(e = names(dem_dam))
+  dem_sf <- terra::as.data.frame(dem_dam, xy = TRUE) %>% st_as_sf(coords = c("x","y")) %>% drop_na() %>% rename(e = names(dem_dam))
   st_crs(dem_sf) <- st_crs(reservoir)
   #joins this with the accumulation information
   points <- st_join(fac_sf, dem_sf)
@@ -96,7 +96,7 @@ getriverpoints <- function(reservoir,
   #  initialise points id column
   points$id <- 1:nrow(points)
   # find midpoint of all points
-  centres <- apply(matrix(unlist(points$geometry), ncol = 2, byrow = T), FUN = "mean", MARGIN = 2)
+  centres <- apply(matrix(unlist(points$geometry), ncol = 2, byrow = TRUE), FUN = "mean", MARGIN = 2)
   latitude <- centres[2]
   longitude <- centres[1]
   # find utm zone based on midpoint

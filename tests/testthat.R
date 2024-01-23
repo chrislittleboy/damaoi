@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(damaoi)
+library(damAOI)
 
-test_check("damaoi")
+test_check("damAOI")

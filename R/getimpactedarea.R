@@ -28,8 +28,8 @@ getimpactedarea <- function(
                           fac,
                           basins,
                           pourpoints,
-                          tocrop = T,
-                          toadjust = F,
+                          tocrop = TRUE,
+                          toadjust = FALSE,
                           poss_expand = 20000,
                           river_distance = 100000,
                           nn = 100,
@@ -41,13 +41,13 @@ getimpactedarea <- function(
   
   # attempts to correct for invalid geometries for the input polygon
   reservoir <- reservoir %>% st_make_valid()
-  if(tocrop == T){
+  if(tocrop == TRUE){
   cropped <- cropdata(reservoir = reservoir, 
                       dem = dem, fac = fac, water_bodies = water_bodies, basins = basins, 
                       river_distance = river_distance)
   dem <- cropped[[1]]; fc <- cropped[[2]]; wb <- cropped[[3]]; basins <- cropped[[4]]
   }
-  if(toadjust == T){
+  if(toadjust == TRUE){
   # adjusts the surface area of the reservoir with satellite-observed surface water to ensure consistency.
   reservoir <- adjustreservoirpolygon(reservoir = reservoir, 
                                       water_bodies = water_bodies, 

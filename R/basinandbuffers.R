@@ -22,7 +22,7 @@ basinandbuffers <- function(reservoir,upstream,downstream,basins,streambuffersiz
   # joins buffered areas to make general impact areas
   impactedarea <- rbind(bufferreservoir,dsb,usb)
   impactedarea <- st_make_valid(impactedarea)
-  impactedarea <- impactedarea[st_is_valid(impactedarea) == T,]
+  impactedarea <- impactedarea[st_is_valid(impactedarea) == TRUE,]
   # ensures that basins are within the impacted area
   cropbasin <- basins[impactedarea,]
   cropbasin$id <- 1:nrow(cropbasin)

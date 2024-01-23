@@ -8,7 +8,7 @@ getminmaxatdam <- function(reservoir, fac) {
   dam_binary <- rasterize(vect(reservoir), fac_dam)
   x <- fac_dam * dam_binary
 # takes x, a one-band flow accumulation in rast format
-  x <-   as.data.frame(x, xy = T)
+  x <-   as.data.frame(x, xy = TRUE)
 # makes the column names standard
   colnames(x) <- c("x", "y", "var")
 # arranges by flow accumulation

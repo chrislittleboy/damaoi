@@ -1,5 +1,5 @@
 ---
-title: "damaoi"
+title: "damAOI"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{damaoi}
@@ -80,7 +80,7 @@ We suggest the CCI Global Water Bodies dataset, for larger dams the 300m^2^ reso
 ```{r}
 library(terra)
 library(sf)
-library(damaoi)
+library(damAOI)
 
 requireNamespace("ggplot2", quietly = TRUE)
 tehri_wb <- rast(system.file("extdata", "wb_tehri.tif", package="damaoi"))
