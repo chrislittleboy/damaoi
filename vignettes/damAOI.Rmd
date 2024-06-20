@@ -83,9 +83,29 @@ library(sf)
 library(damAOI)
 
 requireNamespace("ggplot2", quietly = TRUE)
-tehri_wb <- rast(system.file("extdata", "wb_tehri.tif", package="damAOI"))
-tehri_dem <- rast(system.file("extdata", "dem_tehri.tif", package="damAOI"))
-tehri_adjusted <- adjustreservoirpolygon(tehri, tehri_wb, tehri_dem, 20000, 0)
+fac_tehri <- rast(system.file("extdata", "fac_tehri.tif", package="damAOI"))
+dem_tehri <- rast(system.file("extdata", "dem_tehri.tif", package="damAOI"))
+wb_tehri <- rast(system.file("extdata", "wb_tehri.tif", package="damAOI"))
+# loads input data
+
+preprocessed <- preprocessing(
+    reservoir = tehri, 
+    dem = dem_tehri, 
+    fac = fac_tehri, 
+    water_bodies = wb_tehri,
+    basins = basins_tehri, 
+    river_distance = 30000)
+  tehri_utm <- preprocessed[[1]]
+  tehri_dem_utm <- preprocessed[[2]]
+  tehri_fac_utm <- preprocessed[[3]]
+  basins_tehri_utm <- preprocessed[[4]]
+  tehri_wb_utm <- preprocessed[[5]]
+  espg <- preprocessed[[7]]
+# transforms projection from espg:4326 to the utm zone appropriate for individual dams
+  
+tehri_adjusted <- adjustreservoirpolygon(tehri_utm, tehri_wb_utm, tehri_dem_utm, 20000, 0)
+# adjusts the reservoir polygon
+
 ggplot2::ggplot() + 
   ggplot2::geom_sf(data = tehri_adjusted, fill = "skyblue", col = "skyblue") +
   ggplot2::geom_sf(data = tehri, fill = "blue", col = "blue") +
@@ -121,8 +141,7 @@ This process is again repeated iteratively up to a set distance away from the re
 
 
 ```{r}
-tehri_fac <- rast(system.file("extdata", "fac_tehri.tif", package="damAOI"))
-pourpoints <- autogetpourpoints(tehri_adjusted, tehri_fac)
+pourpoints <- autogetpourpoints(tehri_adjusted, tehri_fac_utm)
 # See commented code at the end of the document for the process to get pour points manually
 
 ppid <- as.vector(1:nrow(pourpoints), mode = "list")
@@ -133,12 +152,12 @@ riverpoints <- lapply(X = ppid, FUN = getriverpoints,
                       ac_tolerance = 50,
                       e_tolerance = 10, 
                       nn = 100, 
-                      fac = tehri_fac,
-                      dem = tehri_dem)
+                      fac = tehri_fac_utm,
+                      dem = tehri_dem_utm)
 riverpoints[sapply(riverpoints, is.null)] <- NULL 
 # if pour points have very small river distances flowing into them, they will be NULL elements in the list of riverpoints
 # this removes the NULL values
-riverlines <- pointstolines(riverpoints)
+riverlines <- pointstolines(riverpoints, espg = espg)
 
 ggplot2::ggplot(tehri_adjusted) +
   ggplot2::geom_sf() +
@@ -185,7 +204,7 @@ bnb <- basinandbuffers(
   reservoir = tehri_adjusted,
   upstream = riverlines[[1]],
   downstream = riverlines[[2]],
-  basins = basins_tehri,
+  basins = basins_tehri_utm,
   streambuffersize = 1500,
   reservoirbuffersize = 3000)
 buffer <- bnb[[1]]

@@ -95,17 +95,6 @@ getriverpoints <- function(reservoir,
   output <- cbind(rep(NA,nrow(fac_sf)),rep(NA,nrow(fac_sf)),rep(NA,nrow(fac_sf)),rep(NA,nrow(fac_sf)),rep(NA,nrow(fac_sf),),rep(NA,nrow(fac_sf)))
   #  initialise points id column
   points$id <- 1:nrow(points)
-  # find midpoint of all points
-  centres <- apply(matrix(unlist(points$geometry), ncol = 2, byrow = TRUE), FUN = "mean", MARGIN = 2)
-  latitude <- centres[2]
-  longitude <- centres[1]
-  # find utm zone based on midpoint
-  espg <- getutm(latitude,longitude)
-  # transform all points to utm
-  points <- st_transform(points, espg)
-  # transform reservoir to utm
-  damnewcrs <- st_transform(reservoir, espg)
-  # finds the starting point
   closest <- points[points$dtostart == min(points$dtostart),]
   # sets initial distance at 0
   distance <- 0
@@ -146,7 +135,7 @@ getriverpoints <- function(reservoir,
     incrementor = incrementor + 1 # resets the process to further down/up the river
   }
   # loop finished
-  riverpoints <- data.frame(output) %>% drop_na() %>% mutate(espg = espg, direction = pourpoint$direction) # transforms output to a tibble, removes nas and adds the projection information
-  colnames(riverpoints) <- c("x", "y", "dist", "dist_accum", "flow_accum", "flow_change", "espg")
+  riverpoints <- data.frame(output) %>% drop_na() %>% mutate(direction = pourpoint$direction) # transforms output to a data frame and adds direction info
+  colnames(riverpoints) <- c("x", "y", "dist", "dist_accum", "flow_accum", "flow_change", "direction")
   return(riverpoints)
   }

@@ -94,16 +94,19 @@ the 300m<sup>2</sup> resolution is sufficient, and the globally
 consistent algorithm for determining surface water extent is key.
 
 ``` r
-library(terra)
-library(sf)
-requireNamespace("ggplot2", quietly = TRUE)
-devtools::load_all()
-tehri_wb <- rast(system.file("extdata", "wb_tehri.tif", package="damaoi"))
-tehri_dem <- rast(system.file("extdata", "dem_tehri.tif", package="damaoi"))
-tehri_adjusted <- adjustreservoirpolygon(tehri, tehri_wb, tehri_dem, 20000, 0)
+
+tehri_adjusted <- adjustreservoirpolygon(
+  tehri_utm,
+  tehri_wb_utm,
+  tehri_dem_utm,
+  poss_expand = 20000, 
+  wbjc = 0)
+# adjusts the reservoir polygon
+
 ggplot2::ggplot() + 
-  ggplot2::geom_sf(data = tehri_adjusted, fill = "skyblue", col = "skyblue") +
-  ggplot2::geom_sf(data = tehri, fill = "blue", col = "blue")
+  ggplot2::geom_sf(data = tehri_adjusted, fill = "skyblue", col = "skyblue", axes = T) +
+  ggplot2::geom_sf(data = tehri_utm, fill = "blue", col = "blue") +
+  ggplot2::theme_void()
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
@@ -151,8 +154,9 @@ process is again repeated iteratively up to a set distance away from the
 reservoir.
 
 ``` r
-tehri_fac <- rast(system.file("extdata", "fac_tehri.tif", package="damaoi"))
-pourpoints <- autogetpourpoints(tehri_adjusted, tehri_fac)
+pourpoints <- autogetpourpoints(tehri_adjusted, tehri_fac_utm)
+# See commented code at the end of the document for the process to get pour points manually
+
 ppid <- as.vector(1:nrow(pourpoints), mode = "list")
 riverpoints <- lapply(X = ppid, FUN = getriverpoints, 
                       reservoir = tehri_adjusted, 
@@ -161,17 +165,17 @@ riverpoints <- lapply(X = ppid, FUN = getriverpoints,
                       ac_tolerance = 50,
                       e_tolerance = 10, 
                       nn = 100, 
-                      fac = tehri_fac,
-                      dem = tehri_dem)
+                      fac = tehri_fac_utm,
+                      dem = tehri_dem_utm)
 riverpoints[sapply(riverpoints, is.null)] <- NULL 
 # if pour points have very small river distances flowing into them, they will be NULL elements in the list of riverpoints
 # this removes the NULL values
-riverlines <- pointstolines(riverpoints)
-
+riverlines <- pointstolines(riverpoints, espg = espg)
 ggplot2::ggplot(tehri_adjusted) +
   ggplot2::geom_sf() +
   ggplot2::geom_sf(data = riverlines[[1]], col = "red") +
-  ggplot2::geom_sf(data = riverlines[[2]], col = "blue")
+  ggplot2::geom_sf(data = riverlines[[2]], col = "blue") +
+  ggplot2::theme_void()
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
@@ -233,14 +237,15 @@ bnb <- basinandbuffers(
   reservoir = tehri_adjusted,
   upstream = riverlines[[1]],
   downstream = riverlines[[2]],
-  basins = basins_tehri,
+  basins = basins_tehri_utm,
   streambuffersize = 1500,
   reservoirbuffersize = 3000)
 ggplot2::ggplot(bnb[[1]] %>% mutate(area = c("res", "down", "up"))) +
   ggplot2::geom_sf(ggplot2::aes(fill = as.factor(area)), alpha = 0.3) +
   ggplot2::geom_sf(data = bnb[[2]] %>% mutate(area = c("res", "down", "up")),
           ggplot2::aes(fill = as.factor(area))) +
-  ggplot2::geom_sf(data = tehri_adjusted, fill = "grey")
+  ggplot2::geom_sf(data = tehri_adjusted, fill = "grey") +
+  ggplot2::theme_void() 
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
