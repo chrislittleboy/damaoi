@@ -6,7 +6,7 @@
 #' @param fac A rast, showing accumulated water flow along river
 
 
-autogetpourpoints <- function(reservoir, fac){  
+autogetpourpoints <- function(reservoir, fac){
   dam_buffer <- st_buffer(reservoir, 2000)
   # crops the flow accumulation raster to the dam buffer
   fac_dam <- crop(fac, dam_buffer, snap = "out")
