@@ -4,7 +4,7 @@
 #' @export
 #' @returns An sf multipolygon with the reservoir buffer, upstream and downstream areas
 #' @param reservoir An sf polygon, with an unstandardised raw reservoir
-#' @param water_bodies A rast, where 1 indicates water, NA otherwise
+#' @param water_bodies A rast, where 1 indicates water, NA otherwise. Required if toadjust == TRUE.
 #' @param dem A rast, showing elevation
 #' @param fac A rast, showing accumulated water flow along river
 #' @param pourpoints An sf multipoint, showing the points where rivers flow in and out of reservoirs
@@ -24,7 +24,7 @@
 
 getimpactedarea <- function(
                           reservoir,
-                          water_bodies,
+                          water_bodies = NULL, # required if toadjust is TRUE
                           dem,
                           fac,
                           basins,

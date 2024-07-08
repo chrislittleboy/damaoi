@@ -6,7 +6,7 @@
 \usage{
 getimpactedarea(
   reservoir,
-  water_bodies,
+  water_bodies = NULL,
   dem,
   fac,
   basins,
@@ -27,7 +27,7 @@ getimpactedarea(
 \arguments{
 \item{reservoir}{An sf polygon, with an unstandardised raw reservoir}
 
-\item{water_bodies}{A rast, where 1 indicates water, NA otherwise}
+\item{water_bodies}{A rast, where 1 indicates water, NA otherwise. Required if toadjust == TRUE.}
 
 \item{dem}{A rast, showing elevation}
 
