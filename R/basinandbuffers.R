@@ -4,16 +4,16 @@
 #' @param reservoir An sf polygon, with a reservoir
 #' @param upstream An sf line, following the river upstream of the reservoir 
 #' @param downstream An sf line, following the river downstream of the reservoir 
-#' @param basins An sf multipolygon, with the basins in the area around the dam 
-#' @param streambuffersize A number indicating the distance around the upstream and downstream river to consider as impacted. Defaults to 2000 (2km).
-#' @param reservoirbuffersize A number indicating the distance around the reserviur to consider as impacted. Defaults to 5000 (5km)
+#' @param method either "rem" or "buffer". With "rem" areas are computed using a relative elevation model with a specific threshold, for example all contiguous areas no more than 30m above the river/reservoir system. With buffer, simple distances away from the river and reservoir are computed. 
+#' @param riversize A number indicating the distance around the upstream and downstream river to consider as impacted. Defaults to 2000 (2km).
+#' @param reservoirsize A number indicating the distance around the reserviur to consider as impacted. Defaults to 5000 (5km)
 
 basinandbuffers <- function(reservoir,
                             upstream,
                             downstream,
-                            basins,
-                            streambuffersize,
-                            reservoirbuffersize){
+                            method = "rem",
+                            riversize,
+                            reservoirsize){
   # combines reservoir and stream lines
   basearea <- rbind(reservoir$geometry,upstream,downstream)
   # buffers the reserrvoir by buffer size parameter.

@@ -25,7 +25,7 @@ require(dplyr)
 
 # The "damAOI" application {.unnumbered}
 
-The "damAOI" application allows researchers to create AOIs which are at the same time locally nuanced and consistent across contexts.
+The "damAOI" application allows researchers to create "Areas of Interest" (AOIs) which are at the same time locally nuanced and consistent across contexts.
 We use data sources on elevation, river flow, water bodies and dam construction sites to allow researchers to programmatically define their AOIs.
 The application was written in statistical software *R* and is designed to help standardize the way we consider the impacts of dams.
 

@@ -24,8 +24,9 @@ require(ggplot2)
 
 # The "damAOI" application {.unnumbered}
 
-The "damAOI" application allows researchers to create AOIs which are at the same time locally nuanced and consistent across contexts.
-We use data sources on elevation, river flow, water bodies and dam construction sites to allow researchers to programmatically define their AOIs.
+The "damAOI" application allows researchers to create "Areas of Interest" (AOIs) which are at the same time locally nuanced and consistent across contexts.
+This is specifically for the comparative analysis of dams in different locations, with different climates and topography.
+We use data sources on elevation, water bodies and dam construction sites to allow researchers to programmatically define their AOIs.
 The application was written in statistical software *R* and is designed to help standardize the way we consider the impacts of dams.
 
 ## Data preprocessing {.unnumbered}
@@ -35,8 +36,7 @@ The application was written in statistical software *R* and is designed to help 
 The functions in damAOI use the following input data:
 
 -   The polygon of reservoirs created by dams. These are typically taken from the [Global Reservoir and Dams (GRanD) dataset](https://sedac.ciesin.columbia.edu/data/collection/grand-v1/methods).
--   The polygons of river basins derived by [HydroBASINS](https://www.hydrosheds.org/products/hydrobasins).
--   Digital Elevation Model (DEM) and Flow ACcumulation (FAC) data from [HydroSHEDS](https://www.hydrosheds.org/hydrosheds-core-downloads).
+-   Digital Elevation Model (DEM) data. In our example we use [HydroSHEDS](https://www.hydrosheds.org/hydrosheds-core-downloads).
 -   Surface water extent data from the [European Space Agency (ESA) Climate Change Initiative (CCI)](https://www.esa-landcover-cci.org/?q=node/162).
 
 Input data can come in many different projections. 
@@ -72,10 +72,8 @@ preprocessed <- preprocessing(
 
 ### Reservoir polygon corrections
 
-Polygons of dam reservoirs are usually obtained from global georeferenced datasets.
+Polygons of dam reservoirs are often obtained from global georeferenced datasets.
 Some polygons in these datasets are inconsistent with true water extent of reservoirs, largely because of inconsistencies in the time of year that reservoir extents are measured or when to consider a wide river as part of the reservoir.
-The *adjustreservoirpolygon* function in our application allows users to match water cover of a background source of water extent.
-We suggest the CCI Global Water Bodies dataset: for larger dams the 300m^2^ resolution is sufficient, and the globally consistent algorithm for determining surface water extent is key.
 
 ``` {r adjust}
 
@@ -87,6 +85,7 @@ tehri_adjusted <- adjustreservoirpolygon(
   dem = tehri_dem_utm)
 
 # create a data frame for water body data for plotting
+
 wbdf <- as.data.frame(crop(tehri_wb_utm,tehri_adjusted), xy=T)
 
 ggplot() + 

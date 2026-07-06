@@ -20,6 +20,7 @@ getriverpoints <- function(reservoir,
                            nn,
                            fac = fac,
                            dem = dem) {
+  
   # creates a buffer of 'river_distance' meters around the dam
   dam_buffer <- st_buffer(reservoir, river_distance)
   # crops the flow accumulation raster to the dam buffer
