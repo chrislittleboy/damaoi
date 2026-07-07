@@ -45,25 +45,31 @@ coltab(riv4326) <- data.frame(value = 1, color = "#FE019A")
 app <- getshinyparams(res = res4326, streams = riv4326)
 
 pourpoints <- runApp(shinyApp(app$ui, app$server))
+pourpoints <- st_transform(pourpoints, st_crs(riv)$wkt)
+write_sf(pourpoints, paste0(ws, "/pp.shp"))
 
+whitebox::wbt_snap_pour_points(
+  pour_pts = paste0(ws, "/pp.shp"),
+  flow_accum = paste0(ws, '/facc.tif'),
+  output = paste0(ws, '/ppsnap.shp'),
+  snap_dist = 100.0)
 
-pourpoints
+list.files(ws)
+pourpoints_snapped <- read_sf(paste0(ws, "/ppsnap.shp"))
+plot(dem_tehri)
+plot(pourpoints_snapped, add = TRUE)
+pourpoints_snapped
 
-ppin <- terra::buffer(as.points(rast(paste0(ws, "/pp_in.tif"))), width = res(fac)[[1]]*2)
-
-plot(densify(ppin, 30))
-
-?wbt_watershed
-?buffer
 writeVector(ppin, paste0(ws,"/ppin.shp"), overwrite = TRUE)
 
 wbt_watershed(
   d8_pntr = paste0(ws, "/fdir.tif"),
-  pour_pts = paste0(ws, "/pp_in.tif"),
+  pour_pts = paste0(ws, "/ppsnap.shp"),
   output = paste0(ws, "/ws_up.tif"),
   verbose_mode =TRUE
 )
 
+up rast(paste0(ws, "/ws_up.tif")
 list.files(ws)
 
 plot(dem_tehri)
